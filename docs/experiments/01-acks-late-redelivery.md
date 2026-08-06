@@ -23,14 +23,20 @@ make send ARGS='sleep_task exp01 60'
 sleep 3
 make kill-worker
 docker compose start worker1
-sleep 25
-docker compose logs --tail=100 worker1
+make events
 ```
+
+Дождись `after_sleep` повторно доставленной задачи, затем нажми `Ctrl+C`.
 
 ## Ожидаем
 
-`before_sleep` появится повторно. Поле `retries` останется равным `0`: повторная доставка
-не является Celery retry.
+Для одного `task_id=exp01` появятся:
+
+1. `before_sleep` с `redelivered=false`;
+2. `before_sleep` с `redelivered=true`;
+3. `after_sleep` с `redelivered=true`.
+
+Поле `retries` останется равным `0`: повторная доставка не является Celery retry.
 
 ## Наблюдение
 
