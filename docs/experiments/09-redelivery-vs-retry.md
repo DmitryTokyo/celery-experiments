@@ -22,9 +22,10 @@ make send ARGS='write_once exp09'
 sleep 2
 make kill-worker
 docker compose start worker1
-sleep 20
-docker compose logs --tail=200 worker1
+make events WORKERS=worker1
 ```
+
+После повторного `write_once_complete` нажми `Ctrl+C`.
 
 ## Ожидаем
 

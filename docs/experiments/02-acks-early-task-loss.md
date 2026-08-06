@@ -20,8 +20,10 @@ sleep 3
 make kill-worker
 docker compose start worker1
 sleep 10
-docker compose logs --tail=100 worker1
+make events WORKERS=worker1
 ```
+
+Убедись, что второго `before_sleep` нет, затем нажми `Ctrl+C`.
 
 ## Ожидаем
 

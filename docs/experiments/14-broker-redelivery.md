@@ -24,8 +24,10 @@ VISIBILITY_TIMEOUT = 20
    date '+redis killed %s'
    make kill-worker
    docker compose start worker1
-   docker compose logs -f worker1
+   make events WORKERS=worker1
    ```
+
+   После `after_sleep` нажми `Ctrl+C` и запиши время возврата задачи.
 
 2. Установи `BROKER = "rabbit"`, пересоздай worker и повтори:
 
@@ -36,8 +38,10 @@ VISIBILITY_TIMEOUT = 20
    date '+rabbit killed %s'
    make kill-worker
    docker compose start worker1
-   docker compose logs -f worker1
+   make events WORKERS=worker1
    ```
+
+   После `after_sleep` нажми `Ctrl+C` и сравни время с Redis.
 
 ## Ожидаем
 

@@ -12,17 +12,19 @@ Prefork:
 WORKER_POOL=prefork CONCURRENCY=4 docker compose up -d --build --force-recreate worker1 redis rabbitmq
 docker compose stop worker2
 make send ARGS='burn_cpu prefork 10 --count 8'
-docker compose logs -f worker1
+make events WORKERS=worker1
 ```
 
-После завершения задач повтори с threads:
+После завершения задач нажми `Ctrl+C` и повтори с threads:
 
 ```bash
 make purge
 WORKER_POOL=threads CONCURRENCY=4 docker compose up -d --force-recreate worker1
 make send ARGS='burn_cpu threads 10 --count 8'
-docker compose logs -f worker1
+make events WORKERS=worker1
 ```
+
+После завершения задач нажми `Ctrl+C`.
 
 ## Ожидаем
 

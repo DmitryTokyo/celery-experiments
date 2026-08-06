@@ -17,9 +17,10 @@ VISIBILITY_TIMEOUT = 10
 ```bash
 CONCURRENCY=2 make up
 make send ARGS='sleep_task exp04 35'
-sleep 45
-docker compose logs --tail=200 worker1 worker2
+make events
 ```
+
+После событий от обоих воркеров нажми `Ctrl+C`.
 
 ## Ожидаем
 

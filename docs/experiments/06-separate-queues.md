@@ -14,9 +14,10 @@ QUEUES=long docker compose up -d --build --force-recreate worker1 redis rabbitmq
 QUEUES=short docker compose up -d --build --force-recreate worker2
 make send ARGS='sleep_task long 60 --count 2 --queue long'
 make send ARGS='sleep_task short 1 --count 10 --queue short'
-sleep 15
-docker compose logs --tail=200 worker1 worker2
+make events
 ```
+
+Когда оба воркера начнут выполнять свои очереди, нажми `Ctrl+C`.
 
 ## Ожидаем
 

@@ -17,9 +17,10 @@ PREFETCH_MULTIPLIER = 4
 CONCURRENCY=1 make up
 make send ARGS='sleep_task long 60'
 make send ARGS='sleep_task short 1 --count 12'
-sleep 15
-docker compose logs --tail=200 worker1 worker2
+make events
 ```
+
+Когда распределение коротких задач станет видно, нажми `Ctrl+C`.
 
 ## Ожидаем
 

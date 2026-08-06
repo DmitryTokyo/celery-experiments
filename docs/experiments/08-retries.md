@@ -10,7 +10,7 @@ Celery повторяет ожидаемую ошибку с растущей з
 ```bash
 make up
 make send ARGS='fail_task exp08 1.0 4'
-docker compose logs -f worker1 worker2
+make events
 ```
 
 Останови просмотр логов после финальной ошибки нажатием `Ctrl+C`.

@@ -10,6 +10,15 @@ make down
 
 Верни изменённые значения в `app/settings.py` после завершения опыта.
 
+Учебные события без служебного шума Celery:
+
+```bash
+make events                 # оба воркера
+make events WORKERS=worker1 # только worker1
+```
+
+Остановить просмотр: `Ctrl+C`.
+
 1. [Позднее подтверждение и повторная доставка](01-acks-late-redelivery.md)
 2. [Раннее подтверждение и потеря задачи](02-acks-early-task-loss.md)
 3. [Потеря дочернего процесса воркера](03-reject-on-worker-lost.md)

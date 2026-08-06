@@ -23,7 +23,7 @@ make send ARGS='sleep_task exp01 60'
 sleep 3
 make kill-worker
 docker compose start worker1
-make events
+make events WORKERS=worker1
 ```
 
 Дождись `after_sleep` повторно доставленной задачи, затем нажми `Ctrl+C`.
