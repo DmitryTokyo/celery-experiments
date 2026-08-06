@@ -39,10 +39,13 @@ make down
 
 ```bash
 make logs
+make events
 make restart
 make kill-worker
 make purge
 ```
+
+`make events` показывает только учебные события `[EXP]`. Остановить просмотр: `Ctrl+C`.
 
 ## Проверки кода
 
