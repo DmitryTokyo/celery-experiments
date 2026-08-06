@@ -1,0 +1,25 @@
+[project]
+name = "celery-tests"
+version = "0.1.0"
+description = "Minimal Celery broker and worker experiment lab"
+readme = "readme.md"
+requires-python = ">=3.13"
+dependencies = [
+    "celery[redis]>=5.5.0,<6",
+    "flower>=2.0.1,<3",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.11.0,<1",
+]
+
+[tool.ruff]
+target-version = "py313"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.ruff.format]
+quote-style = "double"

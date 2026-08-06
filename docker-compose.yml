@@ -1,0 +1,75 @@
+x-celery-environment: &celery-environment
+  WORKER_POOL: ${WORKER_POOL:-prefork}
+  CONCURRENCY: ${CONCURRENCY:-2}
+  QUEUES: ${QUEUES:-default,long,short}
+
+x-celery-service: &celery-service
+  build:
+    context: .
+    dockerfile: dockerfile
+  environment: *celery-environment
+  volumes:
+    - ./app:/workspace/app
+  depends_on:
+    redis:
+      condition: service_healthy
+    rabbitmq:
+      condition: service_healthy
+  init: true
+
+services:
+  redis:
+    image: redis:7-alpine
+    command:
+      - redis-server
+      - --maxmemory
+      - 128mb
+      - --maxmemory-policy
+      - noeviction
+    ports:
+      - "6381:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      timeout: 2s
+      retries: 20
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  worker1:
+    <<: *celery-service
+    command: >-
+      sh -c 'exec celery -A app.celery_app:celery_app worker
+      --loglevel=INFO --hostname=worker1@%h
+      --pool="$${WORKER_POOL}" --concurrency="$${CONCURRENCY}"
+      --queues="$${QUEUES}"'
+
+  worker2:
+    <<: *celery-service
+    command: >-
+      sh -c 'exec celery -A app.celery_app:celery_app worker
+      --loglevel=INFO --hostname=worker2@%h
+      --pool="$${WORKER_POOL}" --concurrency="$${CONCURRENCY}"
+      --queues="$${QUEUES}"'
+
+  beat:
+    <<: *celery-service
+    profiles: ["beat"]
+    command: >-
+      celery -A app.celery_app:celery_app beat --loglevel=INFO
+
+  flower:
+    <<: *celery-service
+    command: >-
+      celery -A app.celery_app:celery_app flower --port=5555
+    ports:
+      - "5555:5555"
