@@ -7,6 +7,7 @@ from typing import Any
 
 from billiard.exceptions import SoftTimeLimitExceeded
 from celery import Task
+from loguru import logger
 from redis import Redis
 
 from app import settings
@@ -17,7 +18,7 @@ class RetryableExperimentError(RuntimeError):
     pass
 
 
-def _exp_log(task: Task[Any, Any], task_id: str, event: str, **fields: Any) -> None:
+def _exp_log(task: Task, task_id: str, event: str, **fields: Any) -> None:
     payload = {
         "delivery_info": dict(task.request.delivery_info or {}),
         "event": event,
@@ -27,11 +28,11 @@ def _exp_log(task: Task[Any, Any], task_id: str, event: str, **fields: Any) -> N
         "task_id": task_id,
         **fields,
     }
-    print(f"[EXP] {json.dumps(payload, sort_keys=True, separators=(',', ':'))}", flush=True)
+    logger.debug(f"[EXP] {json.dumps(payload, sort_keys=True, separators=(',', ':'))}")
 
 
 @celery_app.task(bind=True)
-def sleep_task(self: Task[Any, Any], task_id: str, seconds: float) -> dict[str, Any]:
+def sleep_task(self: Task, task_id: str, seconds: float) -> dict[str, Any]:
     _exp_log(self, task_id, "before_sleep", seconds=seconds)
     time.sleep(seconds)
     _exp_log(self, task_id, "after_sleep", seconds=seconds)
@@ -46,7 +47,7 @@ def sleep_task(self: Task[Any, Any], task_id: str, seconds: float) -> dict[str, 
     retry_jitter=True,
 )
 def fail_task(
-    self: Task[Any, Any],
+    self: Task,
     task_id: str,
     fail_probability: float,
     max_retries: int,
@@ -75,7 +76,7 @@ def fail_task(
 
 
 @celery_app.task(bind=True)
-def burn_cpu(self: Task[Any, Any], task_id: str, seconds: float) -> dict[str, Any]:
+def burn_cpu(self: Task, task_id: str, seconds: float) -> dict[str, Any]:
     _exp_log(self, task_id, "before_burn", seconds=seconds)
     deadline = time.monotonic() + seconds
     iterations = 0
@@ -95,7 +96,7 @@ def burn_cpu(self: Task[Any, Any], task_id: str, seconds: float) -> dict[str, An
 
 
 @celery_app.task(bind=True)
-def write_once(self: Task[Any, Any], key: str) -> dict[str, Any]:
+def write_once(self: Task, key: str) -> dict[str, Any]:
     redis_client: Redis = Redis.from_url(settings.WRITE_ONCE_REDIS_URL, decode_responses=True)
     redis_key = f"celery-lab:write-once:{key}"
     created = bool(redis_client.set(redis_key, "1", nx=True))
@@ -109,7 +110,7 @@ def write_once(self: Task[Any, Any], key: str) -> dict[str, Any]:
 
 
 @celery_app.task(bind=True)
-def soft_limit_task(self: Task[Any, Any], task_id: str, seconds: float) -> dict[str, Any]:
+def soft_limit_task(self: Task, task_id: str, seconds: float) -> dict[str, Any]:
     _exp_log(self, task_id, "before_sleep", seconds=seconds)
     try:
         time.sleep(seconds)
@@ -121,7 +122,7 @@ def soft_limit_task(self: Task[Any, Any], task_id: str, seconds: float) -> dict[
 
 
 @celery_app.task(bind=True)
-def chain_step(self: Task[Any, Any], n: int) -> int:
+def chain_step(self: Task, n: int) -> int:
     request_id = str(self.request.id or "unknown")
     _exp_log(self, request_id, "chain_step", n=n)
     return n + 1

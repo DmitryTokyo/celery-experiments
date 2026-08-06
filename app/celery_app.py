@@ -1,6 +1,17 @@
+import sys
+
 from celery import Celery
+from loguru import logger
 
 from app import settings
+
+logger.remove()
+logger.add(
+    sys.stderr,
+    colorize=True,
+    level="DEBUG",
+    format="<green>{time:HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
+)
 
 celery_app = Celery(
     "celery_lab",
