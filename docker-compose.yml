@@ -1,12 +1,14 @@
 x-celery-environment: &celery-environment
-  WORKER_POOL: ${WORKER_POOL:-prefork}
-  CONCURRENCY: ${CONCURRENCY:-2}
-  QUEUES: ${QUEUES:-default,long,short}
+  WORKER_POOL: ${WORKER_POOL}
+  CONCURRENCY: ${CONCURRENCY}
+  QUEUES: ${QUEUES}
 
 x-celery-service: &celery-service
   build:
     context: .
     dockerfile: dockerfile
+  env_file:
+    - .env
   environment: *celery-environment
   volumes:
     - ./app:/workspace/app

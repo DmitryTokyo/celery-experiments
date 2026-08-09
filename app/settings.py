@@ -1,23 +1,49 @@
-# Change these values before an experiment, then restart the workers.
-BROKER = "redis"
-RESULT_BACKEND = "redis://redis:6379/2"
+import sys
+from pathlib import Path
+from typing import Literal
 
-CELERY_ACKS_LATE = False
-CELERY_REJECT_ON_WORKER_LOST = False
-VISIBILITY_TIMEOUT = 30
-PREFETCH_MULTIPLIER = 1
-SOFT_TIME_LIMIT = None
-TIME_LIMIT = None
+from loguru import logger
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
-WRITE_ONCE_REDIS_URL = "redis://redis:6379/1"
-WRITE_ONCE_POST_SETNX_DELAY = 0
 
-BROKER_URLS = {
-    "redis": "redis://redis:6379/0",
-    "rabbit": "amqp://guest:guest@rabbitmq:5672//",
-}
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=Path(__file__).resolve().parent.parent / ".env",
+        env_file_encoding="utf-8",
+        env_parse_none_str="none",
+        extra="ignore",
+    )
 
-if BROKER not in BROKER_URLS:
-    raise ValueError(f"BROKER must be one of {', '.join(BROKER_URLS)}")
+    broker: Literal["redis", "rabbit"]
+    result_backend: str
 
-BROKER_URL = BROKER_URLS[BROKER]
+    celery_acks_late: bool
+    celery_reject_on_worker_lost: bool
+    visibility_timeout: int
+    prefetch_multiplier: int
+    soft_time_limit: int | None
+    time_limit: int | None
+
+    write_once_redis_url: str
+    write_once_post_setnx_delay: int
+
+    @property
+    def broker_url(self) -> str:
+        return {
+            "redis": "redis://redis:6379/0",
+            "rabbit": "amqp://guest:guest@rabbitmq:5672//",
+        }[self.broker]
+
+
+settings = Settings()
+
+logger.remove()
+logger.add(
+    sys.stderr,
+    colorize=True,
+    level="DEBUG",
+    format=(
+        "<green>{time:HH:mm:ss}</green> | <level>{level: <8}</level> | "
+        "<cyan>{name}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
+    ),
+)

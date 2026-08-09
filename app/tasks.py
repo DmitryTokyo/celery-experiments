@@ -10,8 +10,8 @@ from celery import Task
 from loguru import logger
 from redis import Redis
 
-from app import settings
 from app.celery_app import celery_app
+from app.settings import settings
 
 
 class RetryableExperimentError(RuntimeError):
@@ -97,12 +97,12 @@ def burn_cpu(self: Task, task_id: str, seconds: float) -> dict[str, Any]:
 
 @celery_app.task(bind=True)
 def write_once(self: Task, key: str) -> dict[str, Any]:
-    redis_client: Redis = Redis.from_url(settings.WRITE_ONCE_REDIS_URL, decode_responses=True)
+    redis_client: Redis = Redis.from_url(settings.write_once_redis_url, decode_responses=True)
     redis_key = f"celery-lab:write-once:{key}"
     created = bool(redis_client.set(redis_key, "1", nx=True))
     _exp_log(self, key, "setnx", created=created, key=redis_key)
 
-    delay = settings.WRITE_ONCE_POST_SETNX_DELAY
+    delay = settings.write_once_post_setnx_delay
     if delay > 0:
         time.sleep(delay)
     _exp_log(self, key, "write_once_complete", created=created, key=redis_key)
