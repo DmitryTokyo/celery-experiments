@@ -19,6 +19,18 @@ make events WORKERS=worker1 # только worker1
 
 Остановить просмотр: `Ctrl+C`.
 
+Наблюдение за состоянием Redis во время эксперимента:
+
+```bash
+make redis-watch   # размеры очередей default, short, long и число unacked
+make redis-unacked # содержимое unacked и unacked_index
+```
+
+`redis-watch` обновляет значения каждые 0,5 секунды. `unacked` и `unacked_index` —
+внутренние структуры Redis transport, которые хранят неподтверждённые задачи и время их
+доставки. Команды используют Redis database 0 и применимы к экспериментам с Redis как
+брокером.
+
 1. [Позднее подтверждение и повторная доставка](01-acks-late-redelivery.md)
 2. [Раннее подтверждение и потеря задачи](02-acks-early-task-loss.md)
 3. [Потеря дочернего процесса воркера](03-reject-on-worker-lost.md)
