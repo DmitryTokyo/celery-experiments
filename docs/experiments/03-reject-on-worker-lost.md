@@ -10,12 +10,18 @@ Celery возвращает задачу в очередь при гибели �
 ```python
 CELERY_ACKS_LATE = True
 CELERY_REJECT_ON_WORKER_LOST = True
+VISIBILITY_TIMEOUT = 120
 ```
+
+`VISIBILITY_TIMEOUT` должен быть больше времени выполнения задачи (60 секунд). Иначе
+Redis может повторно доставить уже перезапущенную задачу до её завершения, смешав этот
+сценарий с экспериментом 4.
 
 ## Шаги
 
 ```bash
-WORKER_POOL=prefork CONCURRENCY=2 docker compose up -d --build --force-recreate worker1 redis
+WORKER_POOL=prefork CONCURRENCY=2 \
+  docker compose up -d --build --force-recreate worker1 redis
 docker compose stop worker2
 make send ARGS='sleep_task exp03 60'
 sleep 3
@@ -24,11 +30,17 @@ sleep 5
 make events WORKERS=worker1
 ```
 
-После повторного `before_sleep` нажми `Ctrl+C`.
+Дождись `after_sleep` повторно доставленной задачи, затем нажми `Ctrl+C`.
 
 ## Ожидаем
 
-Основной worker остаётся жив. Задача назначается новому дочернему процессу повторно.
+Основной worker остаётся жив. Для одного `task_id=exp03` появляются:
+
+1. `before_sleep` с `redelivered=false` от первого дочернего процесса;
+2. `before_sleep` с `redelivered=true` от нового дочернего процесса;
+3. `after_sleep` с `redelivered=true` от нового дочернего процесса.
+
+Поле `retries` остаётся равным `0`: это повторная доставка брокером, а не Celery retry.
 
 ## Наблюдение
 
