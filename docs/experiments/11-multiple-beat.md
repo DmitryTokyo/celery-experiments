@@ -7,7 +7,7 @@
 ## Шаги
 
 ```bash
-docker compose --profile beat up -d --build --scale beat=2 beat worker1 redis rabbitmq
+docker compose --profile beat up -d --build --scale beat=2 beat worker1
 sleep 25
 docker compose --profile beat logs --tail=200 beat worker1
 ```
