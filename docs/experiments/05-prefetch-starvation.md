@@ -14,7 +14,8 @@ PREFETCH_MULTIPLIER = 4
 ## Шаги
 
 ```bash
-CONCURRENCY=1 make up
+CONCURRENCY=1
+make up
 make send ARGS='sleep_task long 60'
 make send ARGS='sleep_task short 1 --count 12'
 make events

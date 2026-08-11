@@ -10,7 +10,7 @@
 environment overrides:
 
 ```bash
-QUEUES=long docker compose up -d --build --force-recreate worker1 redis rabbitmq
+QUEUES=long docker compose up -d --build --force-recreate worker1 redis
 QUEUES=short docker compose up -d --build --force-recreate worker2
 make send ARGS='sleep_task long 60 --count 2 --queue long'
 make send ARGS='sleep_task short 1 --count 10 --queue short'
