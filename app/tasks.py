@@ -101,6 +101,10 @@ def write_once(self: Task, key: str) -> dict[str, Any]:
     redis_key = f"celery-lab:write-once:{key}"
     created = bool(redis_client.set(redis_key, "1", nx=True))
     _exp_log(self, key, "setnx", created=created, key=redis_key)
+    if created:
+        _exp_log(self, key, "protected_logic_executed", key=redis_key)
+    else:
+        _exp_log(self, key, "protected_logic_skipped", key=redis_key)
 
     delay = settings.write_once_post_setnx_delay
     if delay > 0:
