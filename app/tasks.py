@@ -76,21 +76,20 @@ def fail_task(
 
 
 @celery_app.task(bind=True)
-def burn_cpu(self: Task, task_id: str, seconds: float) -> dict[str, Any]:
-    _exp_log(self, task_id, "before_burn", seconds=seconds)
-    deadline = time.monotonic() + seconds
-    iterations = 0
+def burn_cpu(self: Task, task_id: str, iterations: int) -> dict[str, Any]:
+    if iterations < 0:
+        raise ValueError("iterations must be non-negative")
+
+    _exp_log(self, task_id, "before_burn", iterations=iterations)
     accumulator = 1
-    while time.monotonic() < deadline:
+    for _ in range(iterations):
         accumulator = (accumulator * 1_664_525 + 1_013_904_223) & 0xFFFFFFFF
-        iterations += 1
     _exp_log(
         self,
         task_id,
         "after_burn",
         accumulator=accumulator,
         iterations=iterations,
-        seconds=seconds,
     )
     return {"iterations": iterations, "task_id": task_id}
 
