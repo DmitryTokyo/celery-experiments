@@ -18,7 +18,7 @@ Redis используется как брокер по умолчанию. Flow
 
 ```bash
 make send ARGS='sleep_task smoke 2'
-docker compose logs worker1 worker2 | grep '\[EXP\]'
+make events
 ```
 
 Остановка:
