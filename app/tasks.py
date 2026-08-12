@@ -5,7 +5,7 @@ import socket
 import time
 from typing import Any
 
-from billiard.exceptions import SoftTimeLimitExceeded, TimeLimitExceeded
+from billiard.exceptions import SoftTimeLimitExceeded
 from celery import Task
 from loguru import logger
 from redis import Redis
@@ -117,7 +117,7 @@ def soft_limit_task(self: Task, task_id: str, seconds: float) -> dict[str, Any]:
     _exp_log(self, task_id, "before_sleep", seconds=seconds)
     try:
         time.sleep(seconds)
-    except TimeLimitExceeded:
+    except SoftTimeLimitExceeded:
         _exp_log(self, task_id, "soft_limit", cleanup="managed to clean up in time")
         raise
     _exp_log(self, task_id, "after_sleep", seconds=seconds)
