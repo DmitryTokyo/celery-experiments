@@ -3,6 +3,7 @@ name = "celery-tests"
 version = "0.1.0"
 description = "Minimal Celery broker and worker experiment lab"
 readme = "readme.md"
+license = "MIT"
 requires-python = ">=3.13"
 dependencies = [
     "celery[redis]>=5.5.0,<6",
